@@ -28,8 +28,11 @@ def check_solution():
     solution = CURRENT.get('solution')
     if solution is None:
         return jsonify({'error': 'No game in progress'}), 400
+
     incorrect = sudoku_logic.find_incorrect_cells(board, solution)
-    return jsonify({'incorrect': incorrect})
+    board_is_full = all(all(cell != 0 for cell in row) for row in board)
+    solved = board_is_full and len(incorrect) == 0
+    return jsonify({'incorrect': incorrect, 'solved': solved})
 
 
 def is_valid_board(board):

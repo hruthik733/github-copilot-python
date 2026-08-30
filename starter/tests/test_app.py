@@ -68,6 +68,41 @@ def test_check_solution_reports_incorrect_positions(client):
     assert [0, 0] in data["incorrect"]
 
 
+def test_check_solution_marks_completed_board_as_solved(client):
+    client.get("/new?clues=35")
+
+    response = client.post("/check", json={"board": [row[:] for row in CURRENT["solution"]]})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["solved"] is True
+    assert data["incorrect"] == []
+
+
+def test_check_solution_rejects_full_incorrect_board(client):
+    client.get("/new?clues=35")
+    board = [row[:] for row in CURRENT["solution"]]
+    board[0][0] = 1 if board[0][0] != 1 else 2
+
+    response = client.post("/check", json={"board": board})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["solved"] is False
+
+
+def test_check_solution_rejects_partially_filled_board(client):
+    client.get("/new?clues=35")
+    board = [[0] * 9 for _ in range(9)]
+    board[0][0] = CURRENT["solution"][0][0]
+
+    response = client.post("/check", json={"board": board})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["solved"] is False
+
+
 def test_check_solution_requires_active_game(client):
     CURRENT["solution"] = None
     CURRENT["puzzle"] = None
