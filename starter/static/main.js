@@ -1,6 +1,12 @@
 // Client-side rendering and interaction for the Flask-backed Sudoku
 const SIZE = 9;
+const DIFFICULTY_TO_CLUES = {
+  easy: 40,
+  medium: 35,
+  hard: 30,
+};
 let puzzle = [];
+let selectedDifficulty = 'medium';
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -48,10 +54,20 @@ function renderPuzzle(puz) {
 }
 
 async function newGame() {
-  const res = await fetch('/new');
+  const clues = DIFFICULTY_TO_CLUES[selectedDifficulty];
+  const res = await fetch(`/new?clues=${clues}`);
   const data = await res.json();
   renderPuzzle(data.puzzle);
   document.getElementById('message').innerText = '';
+}
+
+function setDifficulty(difficulty) {
+  selectedDifficulty = difficulty;
+  document.querySelectorAll('.difficulty-btn').forEach((button) => {
+    const isActive = button.dataset.difficulty === difficulty;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
 }
 
 async function checkSolution() {
@@ -100,6 +116,13 @@ async function checkSolution() {
 window.addEventListener('load', () => {
   document.getElementById('new-game').addEventListener('click', newGame);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
+  document.querySelectorAll('.difficulty-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      setDifficulty(button.dataset.difficulty);
+      newGame();
+    });
+  });
+  setDifficulty(selectedDifficulty);
   // initialize
   newGame();
 });

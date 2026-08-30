@@ -62,6 +62,25 @@ h1 {
     margin: 20px auto;
 }
 
+.difficulty-controls {
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.difficulty-btn {
+    padding: 8px 14px;
+    margin: 0 4px;
+    font-size: 14px;
+    border: 1px solid #1976d2;
+    background: #fff;
+    color: #1976d2;
+}
+
+.difficulty-btn.active {
+    background: #1976d2;
+    color: #fff;
+}
+
 button {
     padding: 8px 18px;
     margin: 0 8px;

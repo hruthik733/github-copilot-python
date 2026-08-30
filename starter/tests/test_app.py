@@ -33,6 +33,27 @@ def test_new_game_route_returns_puzzle(client):
     assert CURRENT["solution"] is not None
 
 
+def test_new_game_route_defaults_to_35_clues(client):
+    response = client.get("/new")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    clue_count = sum(1 for row in payload["puzzle"] for cell in row if cell != 0)
+
+    assert clue_count == 35
+
+
+@pytest.mark.parametrize("clues", [40, 35, 30])
+def test_new_game_route_respects_requested_clue_counts(client, clues):
+    response = client.get(f"/new?clues={clues}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    clue_count = sum(1 for row in payload["puzzle"] for cell in row if cell != 0)
+
+    assert clue_count == clues
+
+
 def test_check_solution_reports_incorrect_positions(client):
     client.get("/new?clues=35")
     solution = [row[:] for row in CURRENT["solution"]]
