@@ -7,6 +7,16 @@ EMPTY = 0
 def deep_copy(board):
     return copy.deepcopy(board)
 
+
+def find_incorrect_cells(board, solution):
+    incorrect = []
+    for i in range(SIZE):
+        for j in range(SIZE):
+            if board[i][j] != solution[i][j]:
+                incorrect.append([i, j])
+    return incorrect
+
+
 def create_empty_board():
     return [[EMPTY for _ in range(SIZE)] for _ in range(SIZE)]
 

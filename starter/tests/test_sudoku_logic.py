@@ -37,6 +37,25 @@ def test_is_safe_rejects_conflicts_in_row_column_and_box():
     assert sudoku_logic.is_safe(board, 0, 2, 4) is True
 
 
+def test_find_incorrect_cells_returns_same_coordinates_as_route_logic():
+    board = [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [4, 5, 6, 7, 8, 9, 1, 2, 3],
+        [7, 8, 9, 1, 2, 3, 4, 5, 6],
+        [2, 3, 4, 5, 6, 7, 8, 9, 1],
+        [5, 6, 7, 8, 9, 1, 2, 3, 4],
+        [8, 9, 1, 2, 3, 4, 5, 6, 7],
+        [3, 4, 5, 6, 7, 8, 9, 1, 2],
+        [6, 7, 8, 9, 1, 2, 3, 4, 5],
+        [9, 1, 2, 3, 4, 5, 6, 7, 8],
+    ]
+    solution = [row[:] for row in board]
+    board[0][0] = 9
+    board[8][8] = 1
+
+    assert sudoku_logic.find_incorrect_cells(board, solution) == [[0, 0], [8, 8]]
+
+
 def test_generate_puzzle_returns_valid_board_and_solution():
     puzzle, solution = sudoku_logic.generate_puzzle(35)
 

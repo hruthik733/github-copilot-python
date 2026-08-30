@@ -28,11 +28,7 @@ def check_solution():
     solution = CURRENT.get('solution')
     if solution is None:
         return jsonify({'error': 'No game in progress'}), 400
-    incorrect = []
-    for i in range(sudoku_logic.SIZE):
-        for j in range(sudoku_logic.SIZE):
-            if board[i][j] != solution[i][j]:
-                incorrect.append([i, j])
+    incorrect = sudoku_logic.find_incorrect_cells(board, solution)
     return jsonify({'incorrect': incorrect})
 
 if __name__ == '__main__':
