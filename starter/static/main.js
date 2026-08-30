@@ -8,6 +8,84 @@ const DIFFICULTY_TO_CLUES = {
 let puzzle = [];
 let selectedDifficulty = 'medium';
 
+function getBoardFromDom() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+  const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+
+  for (let idx = 0; idx < inputs.length; idx++) {
+    const input = inputs[idx];
+    const row = Number(input.dataset.row);
+    const col = Number(input.dataset.col);
+    const value = input.value.trim();
+    board[row][col] = value ? parseInt(value, 10) : 0;
+  }
+
+  return board;
+}
+
+function isCellConflicting(board, row, col, value) {
+  if (!value || value === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < SIZE; i++) {
+    if (i !== col && board[row][i] === value) {
+      return true;
+    }
+  }
+
+  for (let i = 0; i < SIZE; i++) {
+    if (i !== row && board[i][col] === value) {
+      return true;
+    }
+  }
+
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      const nextRow = startRow + i;
+      const nextCol = startCol + j;
+      if ((nextRow !== row || nextCol !== col) && board[nextRow][nextCol] === value) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function updateBoardValidity() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+  const board = getBoardFromDom();
+
+  for (let idx = 0; idx < inputs.length; idx++) {
+    const input = inputs[idx];
+
+    if (input.disabled) {
+      input.classList.remove('invalid');
+      continue;
+    }
+
+    const value = input.value.trim();
+    if (!value) {
+      input.classList.remove('invalid');
+      continue;
+    }
+
+    const row = Number(input.dataset.row);
+    const col = Number(input.dataset.col);
+    const parsedValue = parseInt(value, 10);
+    if (isCellConflicting(board, row, col, parsedValue)) {
+      input.classList.add('invalid');
+    } else {
+      input.classList.remove('invalid');
+    }
+  }
+}
+
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
   boardDiv.innerHTML = '';
@@ -24,6 +102,7 @@ function createBoardElement() {
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
+        updateBoardValidity();
       });
       rowDiv.appendChild(input);
     }
