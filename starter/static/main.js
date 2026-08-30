@@ -145,6 +145,20 @@ function getBoardFromDom() {
   return board;
 }
 
+function getRegionClass(row, col) {
+  return (Math.floor(row / 3) + Math.floor(col / 3)) % 2 === 0 ? 'sudoku-region-a' : 'sudoku-region-b';
+}
+
+function applyCellState(input, stateClass = '') {
+  const row = Number(input.dataset.row);
+  const col = Number(input.dataset.col);
+  input.className = 'sudoku-cell';
+  input.classList.add(getRegionClass(row, col));
+  if (stateClass) {
+    input.classList.add(stateClass);
+  }
+}
+
 function getHintTarget() {
   const boardDiv = document.getElementById('sudoku-board');
   const inputs = boardDiv.getElementsByTagName('input');
@@ -252,6 +266,7 @@ function createBoardElement() {
       input.className = 'sudoku-cell';
       input.dataset.row = i;
       input.dataset.col = j;
+      input.classList.add(getRegionClass(i, j));
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
@@ -274,12 +289,13 @@ function renderPuzzle(puz) {
       const val = puzzle[i][j];
       const inp = inputs[idx];
       if (val !== 0) {
-        inp.value = val;
+        inp.value = String(val);
         inp.disabled = true;
-        inp.className += ' prefilled';
+        applyCellState(inp, 'prefilled');
       } else {
         inp.value = '';
         inp.disabled = false;
+        applyCellState(inp);
       }
     }
   }
@@ -335,9 +351,9 @@ async function checkSolution() {
   for (let idx = 0; idx < inputs.length; idx++) {
     const inp = inputs[idx];
     if (inp.disabled) continue;
-    inp.className = 'sudoku-cell';
+    applyCellState(inp);
     if (incorrect.has(idx)) {
-      inp.className = 'sudoku-cell incorrect';
+      inp.classList.add('incorrect');
     }
   }
 
@@ -406,7 +422,7 @@ async function requestHint() {
 
   input.value = String(data.value);
   input.disabled = true;
-  input.className = 'sudoku-cell hinted';
+  applyCellState(input, 'hinted');
   hintsUsed += 1;
   updateBoardValidity();
 
