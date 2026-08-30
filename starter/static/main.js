@@ -6,12 +6,14 @@ const DIFFICULTY_TO_CLUES = {
   hard: 30,
 };
 const LEADERBOARD_STORAGE_KEY = 'sudokuLeaderboard';
+const THEME_STORAGE_KEY = 'sudokuTheme';
 let puzzle = [];
 let selectedDifficulty = 'medium';
 let timerInterval = null;
 let elapsedSeconds = 0;
 let hintsUsed = 0;
 let currentGameSaved = false;
+let currentTheme = 'light';
 
 function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
@@ -46,6 +48,42 @@ function loadLeaderboard() {
   } catch (error) {
     return [];
   }
+}
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  currentTheme = theme;
+  document.body.classList.toggle('dark-mode', isDark);
+
+  const toggleButton = document.getElementById('theme-toggle');
+  if (toggleButton) {
+    toggleButton.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    toggleButton.setAttribute('aria-pressed', String(isDark));
+    toggleButton.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+}
+
+function getSystemThemePreference() {
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+}
+
+function restoreThemePreference() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    applyTheme(savedTheme);
+    return;
+  }
+
+  applyTheme(getSystemThemePreference());
+}
+
+function toggleTheme() {
+  const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(nextTheme);
+  localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
 }
 
 function renderLeaderboard() {
@@ -378,6 +416,8 @@ async function requestHint() {
 
 // Wire buttons
 window.addEventListener('load', () => {
+  restoreThemePreference();
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('new-game').addEventListener('click', newGame);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
   document.getElementById('hint-button').addEventListener('click', requestHint);

@@ -11,28 +11,57 @@
     --hinted-text: #7a5b00;
     --invalid-bg: #fecaca;
     --invalid-text: #7f1d1d;
+    --heading-color: #333333;
+    --text-color: #1f2937;
+    --button-bg: #1976d2;
+    --button-text: #ffffff;
+    --button-hover-bg: #1565c0;
+    --button-border: #1976d2;
+    --button-secondary-bg: #ffffff;
+    --button-secondary-text: #1976d2;
+    --focus-bg: #dbeafe;
+    --message-color: #d32f2f;
+    --message-success-color: #388e3c;
+    --timer-color: #1f2937;
+    --leaderboard-color: #1f2937;
+    --leaderboard-heading-color: #1f2937;
+    --board-border: #333333;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --page-bg: #111827;
-        --board-bg: #1f2937;
-        --cell-text: #e5e7eb;
-        --cell-border: #4b5563;
-        --region-a-bg: #1b2430;
-        --region-b-bg: #202c39;
-        --prefilled-bg: #2d3748;
-        --prefilled-text: #f3f4f6;
-        --hinted-bg: #4a3b00;
-        --hinted-text: #fef3c7;
-        --invalid-bg: #7f1d1d;
-        --invalid-text: #fee2e2;
-    }
+body.dark-mode {
+    --page-bg: #111827;
+    --board-bg: #1f2937;
+    --cell-text: #e5e7eb;
+    --cell-border: #4b5563;
+    --region-a-bg: #1b2430;
+    --region-b-bg: #202c39;
+    --prefilled-bg: #2d3748;
+    --prefilled-text: #f3f4f6;
+    --hinted-bg: #4a3b00;
+    --hinted-text: #fef3c7;
+    --invalid-bg: #7f1d1d;
+    --invalid-text: #fee2e2;
+    --heading-color: #f3f4f6;
+    --text-color: #e5e7eb;
+    --button-bg: #3b82f6;
+    --button-text: #f9fafb;
+    --button-hover-bg: #2563eb;
+    --button-border: #60a5fa;
+    --button-secondary-bg: #1f2937;
+    --button-secondary-text: #e5e7eb;
+    --focus-bg: #1d4ed8;
+    --message-color: #fca5a5;
+    --message-success-color: #86efac;
+    --timer-color: #e5e7eb;
+    --leaderboard-color: #e5e7eb;
+    --leaderboard-heading-color: #f3f4f6;
+    --board-border: #d1d5db;
 }
 
 body {
     font-family: Arial, sans-serif;
     background: var(--page-bg);
+    color: var(--text-color);
     text-align: center;
     margin: 0;
     padding: 0;
@@ -40,13 +69,13 @@ body {
 
 h1 {
     margin-top: 30px;
-    color: #333;
+    color: var(--heading-color);
 }
 
 #sudoku-board {
     display: inline-block;
     margin: 30px auto;
-    border: 4px solid #333;
+    border: 4px solid var(--board-border);
     background: var(--board-bg);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -76,7 +105,7 @@ h1 {
 }
 
 .sudoku-cell:focus {
-    background: #dbeafe;
+    background: var(--focus-bg);
     color: var(--cell-text);
 }
 
@@ -100,12 +129,12 @@ h1 {
 
 .sudoku-cell:nth-child(3),
 .sudoku-cell:nth-child(6) {
-    border-right: 3px solid #333;
+    border-right: 3px solid var(--board-border);
 }
 
 .sudoku-row:nth-child(3) .sudoku-cell,
 .sudoku-row:nth-child(6) .sudoku-cell {
-    border-bottom: 3px solid #333;
+    border-bottom: 3px solid var(--board-border);
 }
 
 .controls {
@@ -121,14 +150,14 @@ h1 {
     padding: 8px 14px;
     margin: 0 4px;
     font-size: 14px;
-    border: 1px solid #1976d2;
-    background: #fff;
-    color: #1976d2;
+    border: 1px solid var(--button-border);
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
 }
 
 .difficulty-btn.active {
-    background: #1976d2;
-    color: #fff;
+    background: var(--button-bg);
+    color: var(--button-text);
 }
 
 button {
@@ -136,19 +165,44 @@ button {
     margin: 0 8px;
     font-size: 16px;
     border: none;
-    background: #1976d2;
-    color: #fff;
+    background: var(--button-bg);
+    color: var(--button-text);
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s;
 }
 
 button:hover {
-    background: #1565c0;
+    background: var(--button-hover-bg);
+}
+
+#timer {
+    color: var(--timer-color);
 }
 
 #message {
     margin-left: 20px;
     font-size: 16px;
-    color: #d32f2f;
+    color: var(--message-color);
+}
+
+#leaderboard-panel {
+    margin: 20px auto 0;
+    max-width: 540px;
+    color: var(--leaderboard-color);
+}
+
+#leaderboard-panel h2 {
+    color: var(--leaderboard-heading-color);
+}
+
+#leaderboard-list {
+    color: var(--leaderboard-color);
+    text-align: left;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+#theme-toggle {
+    min-width: 120px;
 }
