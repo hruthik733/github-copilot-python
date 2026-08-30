@@ -24,6 +24,38 @@ function getBoardFromDom() {
   return board;
 }
 
+function getHintTarget() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+
+  for (let idx = 0; idx < inputs.length; idx++) {
+    const input = inputs[idx];
+    const isActive = document.activeElement === input;
+    const isEditable = !input.disabled && !input.classList.contains('prefilled');
+    const isEmpty = !input.value.trim();
+    if (isActive && isEditable && isEmpty) {
+      return {
+        row: Number(input.dataset.row),
+        col: Number(input.dataset.col),
+      };
+    }
+  }
+
+  for (let idx = 0; idx < inputs.length; idx++) {
+    const input = inputs[idx];
+    const isEditable = !input.disabled && !input.classList.contains('prefilled');
+    const isEmpty = !input.value.trim();
+    if (isEditable && isEmpty) {
+      return {
+        row: Number(input.dataset.row),
+        col: Number(input.dataset.col),
+      };
+    }
+  }
+
+  return null;
+}
+
 function isCellConflicting(board, row, col, value) {
   if (!value || value === 0) {
     return false;
@@ -191,10 +223,53 @@ async function checkSolution() {
   }
 }
 
+async function requestHint() {
+  const target = getHintTarget();
+  const msg = document.getElementById('message');
+
+  if (!target) {
+    msg.style.color = '#d32f2f';
+    msg.innerText = 'No empty cells remain.';
+    return;
+  }
+
+  const board = getBoardFromDom();
+  const res = await fetch('/hint', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      board,
+      row: target.row,
+      col: target.col,
+    }),
+  });
+  const data = await res.json();
+
+  if (data.error) {
+    msg.style.color = '#d32f2f';
+    msg.innerText = data.error;
+    return;
+  }
+
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+  const idx = target.row * SIZE + target.col;
+  const input = inputs[idx];
+
+  input.value = String(data.value);
+  input.disabled = true;
+  input.className = 'sudoku-cell hinted';
+  updateBoardValidity();
+
+  msg.style.color = '#388e3c';
+  msg.innerText = 'Hint applied.';
+}
+
 // Wire buttons
 window.addEventListener('load', () => {
   document.getElementById('new-game').addEventListener('click', newGame);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
+  document.getElementById('hint-button').addEventListener('click', requestHint);
   document.querySelectorAll('.difficulty-btn').forEach((button) => {
     button.addEventListener('click', () => {
       setDifficulty(button.dataset.difficulty);
