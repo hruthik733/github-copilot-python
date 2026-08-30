@@ -7,6 +7,44 @@ const DIFFICULTY_TO_CLUES = {
 };
 let puzzle = [];
 let selectedDifficulty = 'medium';
+let timerInterval = null;
+let elapsedSeconds = 0;
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function updateTimerDisplay() {
+  const timer = document.getElementById('timer');
+  if (timer) {
+    timer.textContent = formatTime(elapsedSeconds);
+  }
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function resetTimer() {
+  stopTimer();
+  elapsedSeconds = 0;
+  updateTimerDisplay();
+}
+
+function startTimer() {
+  stopTimer();
+  elapsedSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    elapsedSeconds += 1;
+    updateTimerDisplay();
+  }, 1000);
+}
 
 function getBoardFromDom() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -166,10 +204,12 @@ function renderPuzzle(puz) {
 
 async function newGame() {
   const clues = DIFFICULTY_TO_CLUES[selectedDifficulty];
+  resetTimer();
   const res = await fetch(`/new?clues=${clues}`);
   const data = await res.json();
   renderPuzzle(data.puzzle);
   document.getElementById('message').innerText = '';
+  startTimer();
 }
 
 function setDifficulty(difficulty) {
@@ -217,6 +257,7 @@ async function checkSolution() {
   }
 
   if (data.solved) {
+    stopTimer();
     msg.style.color = '#388e3c';
     msg.innerText = 'Congratulations! You solved it!';
     for (let idx = 0; idx < inputs.length; idx++) {
