@@ -75,3 +75,33 @@ def test_generate_puzzle_has_expected_empty_cells():
 
     empty_cells = sum(1 for row in puzzle for cell in row if cell == 0)
     assert empty_cells == 81 - 35
+
+
+def test_count_solutions_for_solved_board_returns_one():
+    solution = [
+        [5, 3, 4, 6, 7, 8, 9, 1, 2],
+        [6, 7, 2, 1, 9, 5, 3, 4, 8],
+        [1, 9, 8, 3, 4, 2, 5, 6, 7],
+        [8, 5, 9, 7, 6, 1, 4, 2, 3],
+        [4, 2, 6, 8, 5, 3, 7, 9, 1],
+        [7, 1, 3, 9, 2, 4, 8, 5, 6],
+        [9, 6, 1, 5, 3, 7, 2, 8, 4],
+        [2, 8, 7, 4, 1, 9, 6, 3, 5],
+        [3, 4, 5, 2, 8, 6, 1, 7, 9],
+    ]
+
+    assert sudoku_logic.count_solutions(solution, limit=2) == 1
+
+
+def test_count_solutions_for_empty_board_returns_two_when_limit_two():
+    board = sudoku_logic.create_empty_board()
+    assert sudoku_logic.count_solutions(board, limit=2) == 2
+
+
+def test_generate_puzzle_35_has_exactly_one_solution():
+    puzzle, solution = sudoku_logic.generate_puzzle(35)
+
+    assert sudoku_logic.count_solutions(puzzle, limit=2) == 1
+    is_valid_sudoku_board(solution)
+    clues = sum(1 for row in puzzle for cell in row if cell != 0)
+    assert clues == 35

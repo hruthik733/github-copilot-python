@@ -49,6 +49,35 @@ def fill_board(board):
                 return False
     return True
 
+
+def count_solutions(board, limit=2):
+    working_board = deep_copy(board)
+    found = 0
+
+    def backtrack():
+        nonlocal found
+
+        if found >= limit:
+            return
+
+        for row in range(SIZE):
+            for col in range(SIZE):
+                if working_board[row][col] == EMPTY:
+                    for num in range(1, SIZE + 1):
+                        if is_safe(working_board, row, col, num):
+                            working_board[row][col] = num
+                            backtrack()
+                            working_board[row][col] = EMPTY
+                            if found >= limit:
+                                return
+                    return
+
+        found += 1
+
+    backtrack()
+    return found
+
+
 def remove_cells(board, clues):
     attempts = SIZE * SIZE - clues
     while attempts > 0:
@@ -59,9 +88,25 @@ def remove_cells(board, clues):
             attempts -= 1
 
 def generate_puzzle(clues=35):
-    board = create_empty_board()
-    fill_board(board)
-    solution = deep_copy(board)
-    remove_cells(board, clues)
-    puzzle = deep_copy(board)
-    return puzzle, solution
+    while True:
+        board = create_empty_board()
+        fill_board(board)
+        solution = deep_copy(board)
+        puzzle = deep_copy(board)
+
+        positions = [(row, col) for row in range(SIZE) for col in range(SIZE)]
+        random.shuffle(positions)
+
+        for row, col in positions:
+            if sum(1 for r in puzzle for c in r if c != EMPTY) <= clues:
+                break
+
+            value = puzzle[row][col]
+            puzzle[row][col] = EMPTY
+            if count_solutions(puzzle, limit=2) == 1:
+                continue
+            puzzle[row][col] = value
+
+        clue_count = sum(1 for row in puzzle for cell in row if cell != EMPTY)
+        if clue_count == clues:
+            return puzzle, solution
