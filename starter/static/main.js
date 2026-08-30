@@ -5,10 +5,13 @@ const DIFFICULTY_TO_CLUES = {
   medium: 35,
   hard: 30,
 };
+const LEADERBOARD_STORAGE_KEY = 'sudokuLeaderboard';
 let puzzle = [];
 let selectedDifficulty = 'medium';
 let timerInterval = null;
 let elapsedSeconds = 0;
+let hintsUsed = 0;
+let currentGameSaved = false;
 
 function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
@@ -34,6 +37,48 @@ function resetTimer() {
   stopTimer();
   elapsedSeconds = 0;
   updateTimerDisplay();
+}
+
+function loadLeaderboard() {
+  try {
+    const storedScores = JSON.parse(localStorage.getItem(LEADERBOARD_STORAGE_KEY) || '[]');
+    return Array.isArray(storedScores) ? storedScores : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function renderLeaderboard() {
+  const leaderboardList = document.getElementById('leaderboard-list');
+  if (!leaderboardList) {
+    return;
+  }
+
+  const scores = loadLeaderboard().sort((a, b) => a.time - b.time || a.hintsUsed - b.hintsUsed || String(a.playerName).localeCompare(String(b.playerName)));
+  leaderboardList.innerHTML = '';
+
+  if (!scores.length) {
+    const emptyItem = document.createElement('li');
+    emptyItem.textContent = 'No scores yet';
+    leaderboardList.appendChild(emptyItem);
+    return;
+  }
+
+  scores.slice(0, 10).forEach((score, index) => {
+    const item = document.createElement('li');
+    item.textContent = `${index + 1}. ${score.playerName} - ${formatTime(score.time)} - ${score.difficulty} - Hints: ${score.hintsUsed}`;
+    leaderboardList.appendChild(item);
+  });
+}
+
+function saveLeaderboardEntry(entry) {
+  const scores = loadLeaderboard();
+  scores.push(entry);
+  const topScores = scores
+    .sort((a, b) => a.time - b.time || a.hintsUsed - b.hintsUsed || String(a.playerName).localeCompare(String(b.playerName)))
+    .slice(0, 10);
+  localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(topScores));
+  renderLeaderboard();
 }
 
 function startTimer() {
@@ -205,6 +250,8 @@ function renderPuzzle(puz) {
 async function newGame() {
   const clues = DIFFICULTY_TO_CLUES[selectedDifficulty];
   resetTimer();
+  hintsUsed = 0;
+  currentGameSaved = false;
   const res = await fetch(`/new?clues=${clues}`);
   const data = await res.json();
   renderPuzzle(data.puzzle);
@@ -258,6 +305,19 @@ async function checkSolution() {
 
   if (data.solved) {
     stopTimer();
+
+    if (!currentGameSaved) {
+      const enteredName = window.prompt('Enter your name for the leaderboard', 'Player');
+      const playerName = String(enteredName ?? '').trim() || 'Player';
+      saveLeaderboardEntry({
+        playerName,
+        time: elapsedSeconds,
+        difficulty: selectedDifficulty,
+        hintsUsed,
+      });
+      currentGameSaved = true;
+    }
+
     msg.style.color = '#388e3c';
     msg.innerText = 'Congratulations! You solved it!';
     for (let idx = 0; idx < inputs.length; idx++) {
@@ -309,6 +369,7 @@ async function requestHint() {
   input.value = String(data.value);
   input.disabled = true;
   input.className = 'sudoku-cell hinted';
+  hintsUsed += 1;
   updateBoardValidity();
 
   msg.style.color = '#388e3c';
